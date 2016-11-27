@@ -9,5 +9,11 @@ public class MainDiscoveryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_discovery);
+        if (savedInstanceState == null) {
+            MainDiscoveryFragment mainDiscoveryFragment = new MainDiscoveryFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, mainDiscoveryFragment)
+                    .commit();
+        }
     }
 }
