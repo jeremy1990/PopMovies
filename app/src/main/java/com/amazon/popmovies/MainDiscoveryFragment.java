@@ -1,19 +1,14 @@
 package com.amazon.popmovies;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -72,7 +67,7 @@ public class MainDiscoveryFragment extends Fragment {
                 "http://image.tmdb.org/t/p/w185/xfWac8MTYDxujaxgPVcRD9yZaul.jpg",
                 "http://image.tmdb.org/t/p/w185/4Iu5f2nv7huqvuYkmZvSPOtbFjs.jpg"
         };
-        new CacheImageTask().execute(movies);
+        new CacheImageTaskProxy(mDiscoveryMoviesAdapter).execute(movies);
     }
 
     @Override
@@ -90,49 +85,22 @@ public class MainDiscoveryFragment extends Fragment {
         return rootView;
     }
 
-    public class CacheImageTask extends AsyncTask<String[], Void, Bitmap[]> {
+    public class CacheImageTaskProxy extends AsyncTask<String[], Void, Bitmap[]> {
+        private CacheImageTask mCacheImageTask;
+
+        public CacheImageTaskProxy(ImageGridAdapter imageGridAdapter) {
+            mCacheImageTask = new CacheImageTask(imageGridAdapter);
+        }
+
         @Override
         protected Bitmap[] doInBackground(String[]...params) {
-            Bitmap[] result = null;
-            if (params != null && params.length == 1) {
-                String[] inputs = params[0];
-                result = new Bitmap[inputs.length];
-                for (int i = 0; i < inputs.length; ++i) {
-                    //Log.d(CacheImageTask.class.getSimpleName(), inputs[i]);
-                    result[i] = getHttpBitmap(inputs[i]);
-                }
-            }
-            return result;
+            return mCacheImageTask.fetchBitmaps(params);
         }
 
         @Override
         protected void onPostExecute(Bitmap[] bitmaps) {
             super.onPostExecute(bitmaps);
-            if (bitmaps != null) {
-                mDiscoveryMoviesAdapter.clear();
-                mDiscoveryMoviesAdapter.addAll(bitmaps);
-            } else {
-                Log.v(CacheImageTask.class.getSimpleName(), "Empty Bitmaps");
-            }
-        }
-
-        private Bitmap getHttpBitmap(String url) {
-            URL myFileURL;
-            Bitmap bitmap = null;
-            try {
-                myFileURL = new URL(url);
-                HttpURLConnection conn = (HttpURLConnection)myFileURL.openConnection();
-                conn.setConnectTimeout(6000);
-                conn.setDoInput(true);
-                conn.setUseCaches(false);
-                conn.connect();
-                InputStream is = conn.getInputStream();
-                bitmap = BitmapFactory.decodeStream(is);
-                is.close();
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-            return bitmap;
+            mCacheImageTask.updateAdapter(bitmaps);
         }
     }
 }
