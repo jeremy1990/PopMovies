@@ -2,41 +2,43 @@ package com.amazon.popmovies;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created by jiamingm on 11/27/16.
  */
-public class CacheImageTask {
+public class CacheImageTask extends AsyncTask<String, Void, Bitmap> {
     private ImageGridAdapter mImageGridAdapter;
+    private List<Bitmap> mBitmapList;
+    private int mIndex;
 
-    public CacheImageTask(ImageGridAdapter imageGridAdapter) {
+    public CacheImageTask(ImageGridAdapter imageGridAdapter, List<Bitmap> bitmapList, int index) {
         mImageGridAdapter = imageGridAdapter;
+        mBitmapList = bitmapList;
+        mIndex = index;
     }
 
-    public Bitmap[] fetchBitmaps(String[]...urls) {
-        Bitmap[] result = null;
+    @Override
+    protected Bitmap doInBackground(String...urls) {
         if (urls != null && urls.length == 1) {
-            String[] inputs = urls[0];
-            result = new Bitmap[inputs.length];
-            for (int i = 0; i < inputs.length; ++i) {
-                //Log.d(CacheImageTask.class.getSimpleName(), inputs[i]);
-                result[i] = getHttpBitmap(inputs[i]);
-            }
+            return getHttpBitmap(urls[0]);
         }
-        return result;
+        return null;
     }
 
-    public void updateAdapter(Bitmap []bitmaps) {
-        if (bitmaps != null) {
-            mImageGridAdapter.clear();
-            mImageGridAdapter.addAll(bitmaps);
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        if (bitmap != null) {
+            mBitmapList.set(mIndex, bitmap);
+            mImageGridAdapter.notifyDataSetChanged();
         } else {
-            Log.v(CacheImageTask.class.getSimpleName(), "Empty Bitmaps");
+            Log.v(CacheImageTask.class.getSimpleName(), "Empty Bitmap");
         }
     }
 

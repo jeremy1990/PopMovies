@@ -1,0 +1,3 @@
+Please add your own TMDB key in the gradle.properties file.
+For example:
+PeronsalTmdbApiKey="My key is an SHA string"
