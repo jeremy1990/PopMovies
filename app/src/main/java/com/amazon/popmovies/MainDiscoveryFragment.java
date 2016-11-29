@@ -27,6 +27,8 @@ import java.util.List;
 public class MainDiscoveryFragment extends Fragment {
     private ImageGridAdapter mDiscoveryMoviesAdapter;
     private List<Bitmap> mBitmapList;
+    private DiscoverMoviesTask mDiscoverMoviesTask;
+    private MovieItemOnItemClickListener mMovieItemClickListner;
 
     public MainDiscoveryFragment() {
         // Required empty public constructor
@@ -45,17 +47,8 @@ public class MainDiscoveryFragment extends Fragment {
         for (int i = 0; i < 20; ++i) {
             mBitmapList.add(placeholder);
         }
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortBy = preferences.getString(getString(R.string.pref_title_sort_by),
-                getString(R.string.pref_default_sort_by));
-        new DiscoverMoviesTask(mDiscoveryMoviesAdapter, mBitmapList)
-                .execute(sortBy);
+        mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity(), mDiscoverMoviesTask);
     }
 
     @Override
@@ -69,6 +62,7 @@ public class MainDiscoveryFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main_discovery, container, false);
         GridView discoveryGrid = (GridView) rootView.findViewById(R.id.discovery_grid);
         discoveryGrid.setAdapter(mDiscoveryMoviesAdapter);
+        discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
 
         return rootView;
     }
@@ -77,6 +71,21 @@ public class MainDiscoveryFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_main_discovery, menu);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (mDiscoverMoviesTask == null) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String sortBy = preferences.getString(getString(R.string.pref_title_sort_by),
+                    getString(R.string.pref_default_sort_by));
+            mDiscoverMoviesTask = new DiscoverMoviesTask(mDiscoveryMoviesAdapter, mBitmapList);
+            mDiscoverMoviesTask.execute(sortBy);
+
+            mMovieItemClickListner.setDiscoverMoviesTask(mDiscoverMoviesTask);
+        }
     }
 
     @Override

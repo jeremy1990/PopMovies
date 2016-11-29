@@ -13,15 +13,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by jiamingm on 11/27/16.
  */
-public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
+public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
     private static final String LOG_TAG = DiscoverMoviesTask.class.getSimpleName();
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
-    private static final String BASE_IMG_URL = "http://image.tmdb.org/t/p/w185/";
     private static final String API_KEY = BuildConfig.TMDB_API_KEY;
     private static final String TYPE_POPULAR = "popular";
     private static final String TYPE_TOP_RATED = "top_rated";
@@ -30,11 +31,13 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
 
     private ImageGridAdapter mImageGridAdapter;
     private List<Bitmap> mBitmapList;
+    private List<Movie> mMovieList;
 
     public DiscoverMoviesTask(ImageGridAdapter imageGridAdapter,
                               List<Bitmap> bitmapList) {
         mImageGridAdapter = imageGridAdapter;
         mBitmapList = bitmapList;
+        mMovieList = new ArrayList<>();
     }
 
     /**
@@ -44,8 +47,8 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
      * @return
      */
     @Override
-    protected String[] doInBackground(String...params) {
-        String[] moviePosts = null;
+    protected List<Movie> doInBackground(String...params) {
+        List<Movie> movieList = null;
         if (params != null && params.length >= 1 && params.length <= 2) {
             String discoveryType = params[0];
             if (TYPE_POPULAR.compareTo(discoveryType) != 0 &&
@@ -87,11 +90,7 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
                 if (stringBuffer.length() == 0) {
                     return null;
                 }
-                List<String> posterPathList = MovieDataParser.getPosterPath(stringBuffer.toString());
-                moviePosts = new String[posterPathList.size()];
-                for (int i = 0; i < posterPathList.size(); ++i) {
-                    moviePosts[i] = BASE_IMG_URL + posterPathList.get(i);
-                }
+                movieList = MovieDataParser.getMovieList(stringBuffer.toString());
             } catch (MalformedURLException e) {
                 Log.e(LOG_TAG, " parse URL error.");
                 e.printStackTrace();
@@ -100,6 +99,10 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
                 e.printStackTrace();
             } catch (JSONException e) {
                 Log.e(LOG_TAG, " parse json data error.");
+                e.printStackTrace();
+            } catch (ParseException e) {
+                Log.e(LOG_TAG, " parse date error.");
+                e.printStackTrace();
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -114,17 +117,23 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, String[]> {
                 }
             }
         }
-        return moviePosts;
+        return movieList;
     }
 
     @Override
-    protected void onPostExecute(String[] posters) {
-        super.onPostExecute(posters);
-        if (posters != null) {
-            for (int i = 0; i < posters.length; ++i) {
+    protected void onPostExecute(List<Movie> movieList) {
+        super.onPostExecute(movieList);
+        if (movieList != null) {
+            mMovieList = movieList;
+            for (int i = 0; i < movieList.size(); ++i) {
+                Movie movie = movieList.get(i);
                 new CacheImageTask(
-                        mImageGridAdapter, mBitmapList, i).execute(posters[i]);
+                        mImageGridAdapter, mBitmapList, i).execute(movie.getPosterPath());
             }
         }
+    }
+
+    public List<Movie> getMovieList() {
+        return mMovieList;
     }
 }
