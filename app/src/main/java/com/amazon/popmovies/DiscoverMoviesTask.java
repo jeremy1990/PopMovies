@@ -50,27 +50,10 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
     protected List<Movie> doInBackground(String...params) {
         List<Movie> movieList = null;
         if (params != null && params.length >= 1 && params.length <= 2) {
-            String discoveryType = params[0];
-            if (TYPE_POPULAR.compareTo(discoveryType) != 0 &&
-                    TYPE_TOP_RATED.compareTo(discoveryType) != 0) {
-                throw new RuntimeException(DiscoverMoviesTask.class.getSimpleName() + ": error discoveryType");
-            }
-            int page = 1;
-            if (params.length == 2) {
-                page = Integer.parseInt(params[1]);
-                if (page <= 0) {
-                    page = 1;
-                }
-            }
-
-            Uri uri = Uri.parse(BASE_URL + discoveryType)
-                    .buildUpon()
-                    .appendQueryParameter(KEY_API_KEY, API_KEY)
-                    .appendQueryParameter(KEY_PAGE, String.valueOf(page))
-                    .build();
             HttpURLConnection urlConnection = null;
             BufferedReader bufferedReader = null;
             try {
+                Uri uri = getUriFromParams(params);
                 URL url = new URL(uri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -135,5 +118,26 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
 
     public List<Movie> getMovieList() {
         return mMovieList;
+    }
+
+    private Uri getUriFromParams(String...params) {
+        String discoveryType = params[0];
+        if (TYPE_POPULAR.compareTo(discoveryType) != 0 &&
+                TYPE_TOP_RATED.compareTo(discoveryType) != 0) {
+            throw new RuntimeException(DiscoverMoviesTask.class.getSimpleName() + ": error discoveryType");
+        }
+        int page = 1;
+        if (params.length == 2) {
+            page = Integer.parseInt(params[1]);
+            if (page <= 0) {
+                page = 1;
+            }
+        }
+
+        return Uri.parse(BASE_URL + discoveryType)
+                .buildUpon()
+                .appendQueryParameter(KEY_API_KEY, API_KEY)
+                .appendQueryParameter(KEY_PAGE, String.valueOf(page))
+                .build();
     }
 }

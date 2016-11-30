@@ -25,7 +25,11 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".MainDiscoveryActivity"/>
         </activity>
-        <activity android:name=".DetailActivity">
+        <activity android:name=".DetailActivity"
+                  android:parentActivityName=".MainDiscoveryActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MainDiscoveryActivity"/>
         </activity>
     </application>
 

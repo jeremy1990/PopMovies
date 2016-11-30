@@ -4,7 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
+import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,6 +16,8 @@ import java.util.List;
  * Created by jiamingm on 11/27/16.
  */
 public class CacheImageTask extends AsyncTask<String, Void, Bitmap> {
+    private static final String BASE_IMG_URL = "http://image.tmdb.org/t/p/w185/";
+
     private ImageGridAdapter mImageGridAdapter;
     private List<Bitmap> mBitmapList;
     private int mIndex;
@@ -26,8 +30,14 @@ public class CacheImageTask extends AsyncTask<String, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(String...urls) {
-        if (urls != null && urls.length == 1) {
-            return getHttpBitmap(urls[0]);
+        try {
+            if (urls != null && urls.length == 1) {
+                // old way: return getHttpBitmap(BASE_IMG_URL + urls[0]);
+                return Picasso.with(mImageGridAdapter.getContext()).load(BASE_IMG_URL + urls[0]).get();
+            }
+        } catch (IOException e) {
+            Log.e(CacheImageTask.class.getSimpleName(), "Cache image error with picasso.");
+            e.printStackTrace();
         }
         return null;
     }
@@ -42,6 +52,7 @@ public class CacheImageTask extends AsyncTask<String, Void, Bitmap> {
         }
     }
 
+    @Deprecated
     private Bitmap getHttpBitmap(String url) {
         URL myFileURL;
         Bitmap bitmap = null;

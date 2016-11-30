@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class MainDiscoveryFragment extends Fragment {
     private List<Bitmap> mBitmapList;
     private DiscoverMoviesTask mDiscoverMoviesTask;
     private MovieItemOnItemClickListener mMovieItemClickListner;
+    private String mSortBy = "popular";
 
     public MainDiscoveryFragment() {
         // Required empty public constructor
@@ -77,14 +79,15 @@ public class MainDiscoveryFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        if (mDiscoverMoviesTask == null) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String sortBy = preferences.getString(getString(R.string.pref_title_sort_by),
-                    getString(R.string.pref_default_sort_by));
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortBy = preferences.getString(getString(R.string.pref_list_sort_by_key),
+                getString(R.string.pref_default_sort_by));
+        if (mDiscoverMoviesTask == null || sortBy.compareTo(mSortBy) != 0) {
             mDiscoverMoviesTask = new DiscoverMoviesTask(mDiscoveryMoviesAdapter, mBitmapList);
             mDiscoverMoviesTask.execute(sortBy);
 
             mMovieItemClickListner.setDiscoverMoviesTask(mDiscoverMoviesTask);
+            mSortBy = sortBy;
         }
     }
 
