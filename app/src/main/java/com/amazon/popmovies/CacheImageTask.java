@@ -14,7 +14,11 @@ import java.util.List;
 
 /**
  * Created by jiamingm on 11/27/16.
+ * Please use CacheImageLoader instead
+ * Since the life cycles of the instances of this Class is not good managed by the activity or fragment
+ * and causes a heavy resource consumption
  */
+@Deprecated
 public class CacheImageTask extends AsyncTask<String, Void, Bitmap> {
     private static final String BASE_IMG_URL = "http://image.tmdb.org/t/p/w185/";
 

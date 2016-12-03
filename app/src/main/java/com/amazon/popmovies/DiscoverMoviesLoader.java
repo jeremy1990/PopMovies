@@ -1,8 +1,8 @@
 package com.amazon.popmovies;
 
-import android.graphics.Bitmap;
+import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import org.json.JSONException;
 
@@ -14,51 +14,40 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jiamingm on 11/27/16.
- * Please use DiscoverMoviesLoader instead
- * Since the life cycles of the instances of this Class is not good managed by the activity or fragment
- * and causes a heavy resource consumption
+ * Created by jiamingm on 12/1/16.
  */
-@Deprecated
-public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
-    private static final String LOG_TAG = DiscoverMoviesTask.class.getSimpleName();
+public class DiscoverMoviesLoader extends AsyncTaskLoader<List<Movie>> {
+    public static final String SORT_BY_KEY = "sort_by";
+    public static final String TYPE_POPULAR = "popular";
+    public static final String TYPE_TOP_RATED = "top_rated";
+    private static final String LOG_TAG = DiscoverMoviesLoader.class.getSimpleName();
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
     private static final String API_KEY = BuildConfig.TMDB_API_KEY;
-    private static final String TYPE_POPULAR = "popular";
-    private static final String TYPE_TOP_RATED = "top_rated";
     private static final String KEY_API_KEY = "api_key";
     private static final String KEY_PAGE = "page";
 
-    private ImageGridAdapter mImageGridAdapter;
-    private List<Bitmap> mBitmapList;
-    private List<Movie> mMovieList;
+    private Uri mUri;
+    private String mSortBy = "";
+    private boolean mNeedToUpdate = false;
 
-    public DiscoverMoviesTask(ImageGridAdapter imageGridAdapter,
-                              List<Bitmap> bitmapList) {
-        mImageGridAdapter = imageGridAdapter;
-        mBitmapList = bitmapList;
-        mMovieList = new ArrayList<>();
+    public DiscoverMoviesLoader(Context context, String...params) {
+        super(context);
+        if (params != null && params.length >= 1 && params.length <= 2) {
+            mUri = getUriFromParams(params);
+        }
     }
 
-    /**
-     * @param params
-     *  params[0] popular or top_rated
-     *  params[1] page default is 1
-     * @return
-     */
     @Override
-    protected List<Movie> doInBackground(String...params) {
+    public List<Movie> loadInBackground() {
         List<Movie> movieList = null;
-        if (params != null && params.length >= 1 && params.length <= 2) {
+        if (mUri != null) {
             HttpURLConnection urlConnection = null;
             BufferedReader bufferedReader = null;
             try {
-                Uri uri = getUriFromParams(params);
-                URL url = new URL(uri.toString());
+                URL url = new URL(mUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -98,7 +87,7 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
                     try {
                         bufferedReader.close();
                     } catch (IOException e) {
-                        Log.e(DiscoverMoviesTask.class.getSimpleName(), " close buffer reader error.");
+                        Log.e(LOG_TAG, " close buffer reader error.");
                         e.printStackTrace();
                     }
                 }
@@ -108,27 +97,30 @@ public class DiscoverMoviesTask extends AsyncTask<String, Void, List<Movie>> {
     }
 
     @Override
-    protected void onPostExecute(List<Movie> movieList) {
-        super.onPostExecute(movieList);
-        if (movieList != null) {
-            mMovieList = movieList;
-            for (int i = 0; i < movieList.size(); ++i) {
-                Movie movie = movieList.get(i);
-                new CacheImageTask(
-                        mImageGridAdapter, mBitmapList, i).execute(movie.getPosterPath());
-            }
+    protected void onStartLoading() {
+        super.onStartLoading();
+        if (mNeedToUpdate) {
+            forceLoad();
         }
     }
 
-    public List<Movie> getMovieList() {
-        return mMovieList;
+    public void updateUriFromParams(String...params) {
+        mUri = getUriFromParams(params);
+        if (mNeedToUpdate) {
+            forceLoad();
+        }
     }
 
     private Uri getUriFromParams(String...params) {
         String discoveryType = params[0];
         if (TYPE_POPULAR.compareTo(discoveryType) != 0 &&
                 TYPE_TOP_RATED.compareTo(discoveryType) != 0) {
-            throw new RuntimeException(DiscoverMoviesTask.class.getSimpleName() + ": error discoveryType");
+            throw new RuntimeException(DiscoverMoviesLoader.class.getSimpleName() + ": error discoveryType");
+        }
+        mNeedToUpdate = false;
+        if (discoveryType.compareTo(mSortBy) != 0) {
+            mSortBy = discoveryType;
+            mNeedToUpdate = true;
         }
         int page = 1;
         if (params.length == 2) {

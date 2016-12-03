@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,14 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class MainDiscoveryFragment extends Fragment {
+    public static final int DISCOVER_MOVIE_LOADER_ID = 0;
+    public static final int CACHE_IMAGE_LOADER_START_ID = 1;
+    public static final int CACHE_IMAGE_BATCH_SIZE = 20;
     private ImageGridAdapter mDiscoveryMoviesAdapter;
     private List<Bitmap> mBitmapList;
-    private DiscoverMoviesTask mDiscoverMoviesTask;
-    private MovieItemOnItemClickListener mMovieItemClickListner;
-    private String mSortBy = "popular";
+    private DiscoverMoviesLoaderCallbacks mDiscoverMoviesLoaderCallbacks;
+    private Loader<List<Movie>> mLoader;
+    //private MovieItemOnItemClickListener mMovieItemClickListner;
 
     public MainDiscoveryFragment() {
         // Required empty public constructor
@@ -46,11 +49,11 @@ public class MainDiscoveryFragment extends Fragment {
         Resources resources = getResources();
         Bitmap placeholder = BitmapFactory.decodeResource(resources, R.drawable.placeholder);
         mBitmapList = new ArrayList<>();
-        for (int i = 0; i < 20; ++i) {
+        for (int i = 0; i < CACHE_IMAGE_BATCH_SIZE; ++i) {
             mBitmapList.add(placeholder);
         }
 
-        mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity(), mDiscoverMoviesTask);
+        //mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity(), mDiscoverMoviesTask);
     }
 
     @Override
@@ -64,7 +67,18 @@ public class MainDiscoveryFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main_discovery, container, false);
         GridView discoveryGrid = (GridView) rootView.findViewById(R.id.discovery_grid);
         discoveryGrid.setAdapter(mDiscoveryMoviesAdapter);
-        discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
+        //discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
+
+        mDiscoverMoviesLoaderCallbacks = new DiscoverMoviesLoaderCallbacks(
+                getLoaderManager(),
+                getActivity().getSupportLoaderManager(),
+                getActivity(),
+                mDiscoveryMoviesAdapter,
+                mBitmapList);
+        Bundle args = new Bundle();
+        args.putString(DiscoverMoviesLoader.SORT_BY_KEY, DiscoverMoviesLoader.TYPE_POPULAR);
+        mLoader = getLoaderManager()
+                .initLoader(0, args, mDiscoverMoviesLoaderCallbacks);
 
         return rootView;
     }
@@ -82,13 +96,19 @@ public class MainDiscoveryFragment extends Fragment {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortBy = preferences.getString(getString(R.string.pref_list_sort_by_key),
                 getString(R.string.pref_default_sort_by));
-        if (mDiscoverMoviesTask == null || sortBy.compareTo(mSortBy) != 0) {
+        ((DiscoverMoviesLoader)mLoader).updateUriFromParams(sortBy);
+        /*Bundle args = new Bundle();
+        args.putString(DiscoverMoviesLoader.SORT_BY_KEY, sortBy);
+        Loader<List<Movie>> loader = getLoaderManager()
+                .initLoader(0, args, mDiscoverMoviesLoaderCallbacks);
+        loader.forceLoad();*/
+        /*if (mDiscoverMoviesTask == null || sortBy.compareTo(mSortBy) != 0) {
             mDiscoverMoviesTask = new DiscoverMoviesTask(mDiscoveryMoviesAdapter, mBitmapList);
             mDiscoverMoviesTask.execute(sortBy);
 
             mMovieItemClickListner.setDiscoverMoviesTask(mDiscoverMoviesTask);
             mSortBy = sortBy;
-        }
+        }*/
     }
 
     @Override
