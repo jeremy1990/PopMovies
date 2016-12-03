@@ -18,7 +18,6 @@ public class DiscoverMoviesLoaderCallbacks
     private LoaderManager mLoaderManager;
     private LoaderManager mSupportLoaderManager;
     private Context mContext;
-    private MovieItemOnItemClickListener mMovieItemOnItemClickListner;
     private ImageGridAdapter mImageGridAdapter;
     private List<Bitmap> mBitmapList;
     private int mMovieListSize = MainDiscoveryFragment.CACHE_IMAGE_BATCH_SIZE;
@@ -27,13 +26,11 @@ public class DiscoverMoviesLoaderCallbacks
     public DiscoverMoviesLoaderCallbacks(LoaderManager loaderManager,
                                          LoaderManager supportLoaderManager,
                                          Context context,
-                                         MovieItemOnItemClickListener movieItemOnItemClickListener,
                                          ImageGridAdapter imageGridAdapter,
                                          List<Bitmap> bitmapList) {
         mLoaderManager = loaderManager;
         mSupportLoaderManager = supportLoaderManager;
         mContext = context;
-        mMovieItemOnItemClickListner = movieItemOnItemClickListener;
         mImageGridAdapter = imageGridAdapter;
         mBitmapList = bitmapList;
         mCallbacksDict = new HashMap<>();
@@ -51,7 +48,7 @@ public class DiscoverMoviesLoaderCallbacks
         Loader<List<Movie>> loader = mSupportLoaderManager.getLoader(id);
         if (id == MainDiscoveryFragment.DISCOVER_MOVIE_LOADER_ID) {
             if (loader == null) {
-                loader = new DiscoverMoviesLoader(mContext, mMovieItemOnItemClickListner, sortBy);
+                loader = new DiscoverMoviesLoader(mContext, sortBy);
             }
         } else {
             throw new RuntimeException("Error loader id: " + id);
@@ -91,9 +88,9 @@ public class DiscoverMoviesLoaderCallbacks
 
     @Override
     public void onLoaderReset(Loader<List<Movie>> loader) {
-        for (int i = 0; i < mMovieListSize; ++i) {
-            Loader<Bitmap> cacheImageLoader = mSupportLoaderManager.getLoader(MainDiscoveryFragment.CACHE_IMAGE_LOADER_START_ID + i);
-            cacheImageLoader.reset();
+        if (loader != null) {
+            mBitmapList.clear();
+            mImageGridAdapter.clear();
         }
     }
 }

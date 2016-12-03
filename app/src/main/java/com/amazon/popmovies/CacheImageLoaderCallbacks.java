@@ -64,6 +64,5 @@ public class CacheImageLoaderCallbacks
 
     @Override
     public void onLoaderReset(Loader<Bitmap> loader) {
-        mBitmapList.clear();
     }
 }

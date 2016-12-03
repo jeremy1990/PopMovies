@@ -33,12 +33,12 @@ public class DiscoverMoviesLoader extends AsyncTaskLoader<List<Movie>> {
     private Uri mUri;
     private String mSortBy = "";
     private boolean mNeedToUpdate = false;
+    private List<Movie> mMovieList;
 
     public DiscoverMoviesLoader(Context context,
-                                MovieItemOnItemClickListener movieItemOnItemClickListener,
                                 String...params) {
         super(context);
-        mMovieItemOnItemClickListner = movieItemOnItemClickListener;
+        mMovieItemOnItemClickListner = new MovieItemOnItemClickListener(context);
         if (params != null && params.length >= 1 && params.length <= 2) {
             mUri = getUriFromParams(params);
         }
@@ -103,7 +103,8 @@ public class DiscoverMoviesLoader extends AsyncTaskLoader<List<Movie>> {
     @Override
     public void deliverResult(List<Movie> data) {
         super.deliverResult(data);
-        if (data != null && mMovieItemOnItemClickListner != null) {
+        if (mMovieItemOnItemClickListner != null && data != null) {
+            mMovieList = data;
             mMovieItemOnItemClickListner.updateMovieList(data);
         }
     }
@@ -116,10 +117,17 @@ public class DiscoverMoviesLoader extends AsyncTaskLoader<List<Movie>> {
         }
     }
 
+    public MovieItemOnItemClickListener getMovieItemOnItemClickListner() {
+        return mMovieItemOnItemClickListner;
+    }
     public void updateUriFromParams(String...params) {
         mUri = getUriFromParams(params);
         if (mNeedToUpdate) {
             forceLoad();
+        } else {
+            if (mMovieItemOnItemClickListner != null && mMovieList != null) {
+                mMovieItemOnItemClickListner.updateMovieList(mMovieList);
+            }
         }
     }
 

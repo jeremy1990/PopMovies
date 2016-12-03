@@ -33,7 +33,6 @@ public class MainDiscoveryFragment extends Fragment {
     private List<Bitmap> mBitmapList;
     private DiscoverMoviesLoaderCallbacks mDiscoverMoviesLoaderCallbacks;
     private Loader<List<Movie>> mLoader;
-    private MovieItemOnItemClickListener mMovieItemClickListner;
 
     public MainDiscoveryFragment() {
         // Required empty public constructor
@@ -42,7 +41,6 @@ public class MainDiscoveryFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setHasOptionsMenu(true);
 
         // initialize the placeholder
@@ -56,12 +54,10 @@ public class MainDiscoveryFragment extends Fragment {
                 getActivity(),
                 R.layout.main_discovery_item,
                 mBitmapList);
-        mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity());
         mDiscoverMoviesLoaderCallbacks = new DiscoverMoviesLoaderCallbacks(
                 getLoaderManager(),
                 getActivity().getSupportLoaderManager(),
                 getActivity(),
-                mMovieItemClickListner,
                 mDiscoveryMoviesAdapter,
                 mBitmapList);
         Bundle args = new Bundle();
@@ -77,7 +73,8 @@ public class MainDiscoveryFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main_discovery, container, false);
         GridView discoveryGrid = (GridView) rootView.findViewById(R.id.discovery_grid);
         discoveryGrid.setAdapter(mDiscoveryMoviesAdapter);
-        discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
+        discoveryGrid.setOnItemClickListener(
+                ((DiscoverMoviesLoader) mLoader).getMovieItemOnItemClickListner());
         return rootView;
     }
 
