@@ -1,53 +1,54 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    tools:context="com.amazon.popmovies.DetailFragment">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools">
+    <ScrollView android:layout_width="match_parent"
+                android:layout_height="match_parent">
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        tools:context="com.amazon.popmovies.DetailFragment">
 
-        <ImageView android:layout_width="@dimen/poster_width"
-                   android:layout_height="wrap_content"
-                   android:scaleType="fitXY"
-                   android:layout_centerHorizontal="true"
-                   android:id="@+id/poster"
-                   android:background="@drawable/placeholder"/>
+            <ImageView android:layout_width="@dimen/poster_width"
+                       android:layout_height="wrap_content"
+                       android:scaleType="fitXY"
+                       android:layout_centerHorizontal="true"
+                       android:id="@+id/poster"
+                       android:background="@drawable/placeholder"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/poster"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/original_title"
-                android:textSize="@dimen/original_title_size"
-                tools:text="@string/original_title_placeholder"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/poster"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/original_title"
+                    android:textSize="@dimen/original_title_size"
+                    tools:text="@string/original_title_placeholder"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/original_title"
-                android:layout_alignParentLeft="true"
-                android:layout_marginRight="@dimen/poster_over_text_margin"
-                tools:text="@string/release_date"
-                android:id="@+id/release_date"
-                android:layout_gravity="center_horizontal"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/original_title"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginRight="@dimen/poster_over_text_margin"
+                    tools:text="@string/release_date"
+                    android:id="@+id/release_date"
+                    android:layout_gravity="center_horizontal"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/original_title"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="@dimen/poster_over_text_margin"
-                android:id="@+id/rating"
-                tools:text="@string/rating"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/original_title"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="@dimen/poster_over_text_margin"
+                    android:id="@+id/rating"
+                    tools:text="@string/rating"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/rating"
-                tools:text="@string/overview"
-                android:id="@+id/overview"
-                android:layout_gravity="center_horizontal"/>
-    </RelativeLayout>
-</ScrollView>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/rating"
+                    tools:text="@string/overview"
+                    android:id="@+id/overview"
+                    android:layout_gravity="center_horizontal"/>
+        </RelativeLayout>
+    </ScrollView>
+</layout>
