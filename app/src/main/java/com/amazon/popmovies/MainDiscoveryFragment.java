@@ -33,7 +33,7 @@ public class MainDiscoveryFragment extends Fragment {
     private List<Bitmap> mBitmapList;
     private DiscoverMoviesLoaderCallbacks mDiscoverMoviesLoaderCallbacks;
     private Loader<List<Movie>> mLoader;
-    //private MovieItemOnItemClickListener mMovieItemClickListner;
+    private MovieItemOnItemClickListener mMovieItemClickListner;
 
     public MainDiscoveryFragment() {
         // Required empty public constructor
@@ -52,34 +52,32 @@ public class MainDiscoveryFragment extends Fragment {
         for (int i = 0; i < CACHE_IMAGE_BATCH_SIZE; ++i) {
             mBitmapList.add(placeholder);
         }
-
-        //mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity(), mDiscoverMoviesTask);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         mDiscoveryMoviesAdapter = new ImageGridAdapter(
                 getActivity(),
                 R.layout.main_discovery_item,
                 mBitmapList);
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main_discovery, container, false);
-        GridView discoveryGrid = (GridView) rootView.findViewById(R.id.discovery_grid);
-        discoveryGrid.setAdapter(mDiscoveryMoviesAdapter);
-        //discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
-
+        mMovieItemClickListner = new MovieItemOnItemClickListener(getActivity());
         mDiscoverMoviesLoaderCallbacks = new DiscoverMoviesLoaderCallbacks(
                 getLoaderManager(),
                 getActivity().getSupportLoaderManager(),
                 getActivity(),
+                mMovieItemClickListner,
                 mDiscoveryMoviesAdapter,
                 mBitmapList);
         Bundle args = new Bundle();
         args.putString(DiscoverMoviesLoader.SORT_BY_KEY, DiscoverMoviesLoader.TYPE_POPULAR);
         mLoader = getLoaderManager()
                 .initLoader(0, args, mDiscoverMoviesLoaderCallbacks);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_main_discovery, container, false);
+        GridView discoveryGrid = (GridView) rootView.findViewById(R.id.discovery_grid);
+        discoveryGrid.setAdapter(mDiscoveryMoviesAdapter);
+        discoveryGrid.setOnItemClickListener(mMovieItemClickListner);
         return rootView;
     }
 
@@ -97,18 +95,6 @@ public class MainDiscoveryFragment extends Fragment {
         String sortBy = preferences.getString(getString(R.string.pref_list_sort_by_key),
                 getString(R.string.pref_default_sort_by));
         ((DiscoverMoviesLoader)mLoader).updateUriFromParams(sortBy);
-        /*Bundle args = new Bundle();
-        args.putString(DiscoverMoviesLoader.SORT_BY_KEY, sortBy);
-        Loader<List<Movie>> loader = getLoaderManager()
-                .initLoader(0, args, mDiscoverMoviesLoaderCallbacks);
-        loader.forceLoad();*/
-        /*if (mDiscoverMoviesTask == null || sortBy.compareTo(mSortBy) != 0) {
-            mDiscoverMoviesTask = new DiscoverMoviesTask(mDiscoveryMoviesAdapter, mBitmapList);
-            mDiscoverMoviesTask.execute(sortBy);
-
-            mMovieItemClickListner.setDiscoverMoviesTask(mDiscoverMoviesTask);
-            mSortBy = sortBy;
-        }*/
     }
 
     @Override

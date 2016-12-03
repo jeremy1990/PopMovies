@@ -13,32 +13,27 @@ import java.util.List;
  */
 public class MovieItemOnItemClickListener implements AdapterView.OnItemClickListener {
     private Context mContext;
-    private DiscoverMoviesTask mDiscoverMoviesTask;
+    private List<Movie> mMovieList;
 
-    public MovieItemOnItemClickListener(final Context context,
-                                        final DiscoverMoviesTask discoverMoviesTask) {
+    public MovieItemOnItemClickListener(final Context context) {
         mContext = context;
-        mDiscoverMoviesTask = discoverMoviesTask;
     }
 
-    void setDiscoverMoviesTask(final DiscoverMoviesTask discoverMoviesTask) {
-        mDiscoverMoviesTask = discoverMoviesTask;
+    public void updateMovieList(final List<Movie> movieList) {
+        mMovieList = movieList;
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        if (mDiscoverMoviesTask != null) {
-            List<Movie> movieList = mDiscoverMoviesTask.getMovieList();
-            if (movieList != null && movieList.size() > i) {
-                Movie movie = movieList.get(i);
-                if (movie != null) {
-                    Toast toast = Toast.makeText(mContext, movie.getOriginalTitle(), Toast.LENGTH_SHORT);
-                    toast.show();
+        if (mMovieList != null && mMovieList.size() > i) {
+            Movie movie = mMovieList.get(i);
+            if (movie != null) {
+                Toast toast = Toast.makeText(mContext, movie.getOriginalTitle(), Toast.LENGTH_SHORT);
+                toast.show();
 
-                    Intent detailIntent = new Intent(mContext, DetailActivity.class);
-                    detailIntent.putExtra(DetailActivity.MOVIE_DATA, movie);
-                    mContext.startActivity(detailIntent);
-                }
+                Intent detailIntent = new Intent(mContext, DetailActivity.class);
+                detailIntent.putExtra(DetailActivity.MOVIE_DATA, movie);
+                mContext.startActivity(detailIntent);
             }
         }
     }
