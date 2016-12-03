@@ -30,7 +30,7 @@ public class DetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(DetailActivity.MOVIE_DATA)) {
-            Movie movie = (Movie) intent.getSerializableExtra(DetailActivity.MOVIE_DATA);
+            Movie movie = intent.getParcelableExtra(DetailActivity.MOVIE_DATA);
             if (movie != null) {
                 ImageView poster = (ImageView) rootView.findViewById(R.id.poster);
                 Picasso.with(getActivity()).load(BASE_IMG_URL + movie.getPosterPath()).into(poster);
